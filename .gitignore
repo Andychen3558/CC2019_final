@@ -2,6 +2,8 @@
 __pycache__/
 *.py[cod]
 *$py.class
+val2017
+*.json
 
 # C extensions
 *.so
