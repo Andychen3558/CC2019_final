@@ -9,8 +9,10 @@ import matplotlib.pyplot as plt
 import cvlib as cv
 from cvlib.object_detection import draw_bbox
 
-def viewImage(img):
-	cv2.imshow('Display', img)
+
+def viewImage(img, file_name):
+	timestamp = file_name.split('@@')[1].rstrip('.jpg') + '(s)'
+	cv2.imshow(timestamp, img)
 	cv2.waitKey(0)
 	cv2.destroyAllWindows()
 
@@ -31,13 +33,13 @@ class ObjectDetector():
 		objects = {}
 		count = 0
 		for f in os.listdir(path):
-			if count == 100:
-				break
+			# if count == 100:
+			# 	break
 			file = join(path, f)
 			img = cv2.imread(file)
 			bbox, labels, conf = cv.detect_common_objects(img)
 			data.append({'file':file, 'bbox':bbox, 'labels':labels, 'conf':conf})
-			# build object table
+			## build object table
 			for label in labels:
 				if label not in objects:
 					objects[label] = []
@@ -45,9 +47,9 @@ class ObjectDetector():
 			count += 1
 		for key in objects:
 			objects[key] = list(set(objects[key]))
-		# write file
-		json.dump(objects, open('objects.json', 'w'))
-		json.dump(data, open('data.json', 'w'))
+		## write file
+		json.dump(objects, open(path + '_objects.json', 'w'))
+		json.dump(data, open(path + '_data.json', 'w'))
 
 	def retrieveImages(self, query):
 		if query not in self.objects:
@@ -60,11 +62,11 @@ class ObjectDetector():
 			return
 		for idx in results:
 			img = cv2.imread(self.data[idx]['file'])
-			img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+			# img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 			bbox, conf = [], []
 			for i in range(len(self.data[idx]['labels'])):
 				if self.data[idx]['labels'][i] == label:
 					bbox.append(self.data[idx]['bbox'][i])
 					conf.append(self.data[idx]['conf'][i])
 			output_image = draw_bbox(img, bbox, [label]*len(bbox), conf)
-			viewImage(output_image)
+			viewImage(output_image, self.data[idx]['file'])
