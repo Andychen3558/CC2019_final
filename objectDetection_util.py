@@ -10,8 +10,7 @@ import cvlib as cv
 from cvlib.object_detection import draw_bbox
 
 def viewImage(img):
-	cv2.namedWindow("enhanced",0);
-	cv2.imshow('enhanced', img)
+	cv2.imshow('Display', img)
 	cv2.waitKey(0)
 	cv2.destroyAllWindows()
 
@@ -68,15 +67,4 @@ class ObjectDetector():
 					bbox.append(self.data[idx]['bbox'][i])
 					conf.append(self.data[idx]['conf'][i])
 			output_image = draw_bbox(img, bbox, [label]*len(bbox), conf)
-			plt.imshow(output_image)
-			plt.show()
-
-
-
-if __name__ == '__main__':
-	## Reading image data
-	new = ObjectDetector()
-	new.makeDataset('./val2017')
-	new.loadData('objects.json', 'data.json')
-
-	
+			viewImage(output_image)

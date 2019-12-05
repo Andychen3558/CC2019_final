@@ -22,7 +22,9 @@ def main():
 	detector.loadData('objects.json', 'data.json')
 
 	while True:
-		query = input('Please type your query object:')
+		query = input('Please type your query object: ')
+		if query == '!':
+			break
 		results = detector.retrieveImages(query)
 		# print(results)
 		detector.outputTargetImages(results, query)
