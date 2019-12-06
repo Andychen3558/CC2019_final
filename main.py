@@ -24,20 +24,29 @@ def preprocessVideo(video):
 def main():
 	## add arguments
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--video', type=str)
-	args = parser.parse_args()
-	if not isfile(args.video):
-		print('[Video doesn\'t exist!]')
-		return
-	video_keyframes_dir = './' + args.video.split('.')[0]
-	if not isdir(video_keyframes_dir):
-		video_keyframes_dir = preprocessVideo(args.video)
-		ObjectDetector.makeDataset(video_keyframes_dir)
+	parser.add_argument('--make_dataset', action='store_true')
+	parser.add_argument('--data_dir', default='keyframes')
+	parser.add_argument('--object_file', default='objects.json')
+	parser.add_argument('--data_file', default='data.json')
+	# parser.add_argument('--video', type=str)
+	# args = parser.parse_args()
+	# if not isfile(args.video):
+	# 	print('[Video doesn\'t exist!]')
+	# 	return
+	# video_keyframes_dir = './' + args.video.split('.')[0]
+	# if not isdir(video_keyframes_dir):
+	# 	video_keyframes_dir = preprocessVideo(args.video)
+	# 	ObjectDetector.makeDataset(video_keyframes_dir)
 
+	args = parser.parse_args()
+	if args.make_dataset:
+		ObjectDetector.makeDataset(args.data_dir)
+		exit()
 
 	## create object detector
 	detector = ObjectDetector()
-	detector.loadData(video_keyframes_dir + '_objects.json', video_keyframes_dir + '_data.json')
+	# detector.loadData(video_keyframes_dir + '_objects.json', video_keyframes_dir + '_data.json')
+	detector.loadData(args.object_file, args.data_file)
 
 	while True:
 		query = input('Please type your query object or type \'!\' to exit: ').strip()
