@@ -58,9 +58,11 @@ class ObjectDetector():
 		json.dump(data, open('data.json', 'w'))
 
 	def retrieveImages(self, query):
-		if query not in self.objects:
-			return None
-		return self.objects[query]
+		threshold = 0.75
+		
+		# if query not in self.objects:
+		# 	return None
+		# return self.objects[query]
 
 	def outputTargetImages(self, results, label):
 		if not results:
