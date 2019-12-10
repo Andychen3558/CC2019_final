@@ -21,6 +21,7 @@ class ObjectDetector():
 	def __init__(self):
 		self.objects = {}
 		self.data = []
+		self.embedding = Embedding()
 
 	def loadData(self, object_file, data_file):
 		self.objects = json.load(open(object_file, 'r'))
@@ -58,11 +59,22 @@ class ObjectDetector():
 		json.dump(data, open('data.json', 'w'))
 
 	def retrieveImages(self, query):
-		threshold = 0.75
-		
-		# if query not in self.objects:
-		# 	return None
-		# return self.objects[query]
+		threshold = 0.3
+		# use api to get ranked_list
+		ranked_list = self.embedding.retrieve(query)
+		n = len(self.data)
+		scores = [0.0] * n
+
+		ranked_list = [(label, emb_score) for (label, emb_score) in ranked_list if emb_score >= threshold]
+
+		# compute score using tf-idf
+		for (label, emb_score) in ranked_list:
+			for idx in self.objects[label]:
+				tf = np.sum([l == label for l in self.data[idx]['labels']])
+				idf = np.log(n / len(self.objects[label]))
+				scores[idx] += tf * idf * emb_score
+		# return image indices with top 10 highest scores
+		return np.argsort(scores)[::-1][:10]
 
 	def outputTargetImages(self, results, label):
 		if not results:
@@ -78,3 +90,4 @@ class ObjectDetector():
 					conf.append(self.data[idx]['conf'][i])
 			output_image = draw_bbox(img, bbox, [label]*len(bbox), conf)
 			viewImage(output_image, self.data[idx]['file'])
+
