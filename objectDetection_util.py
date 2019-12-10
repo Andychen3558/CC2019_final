@@ -8,7 +8,7 @@ import json
 import matplotlib.pyplot as plt
 import cvlib as cv
 from cvlib.object_detection import draw_bbox
-
+from embedding import Embedding
 
 def viewImage(img, file_name):
 	timestamp = file_name.split('@@')[1].rstrip('.jpg') + '(s)'
