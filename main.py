@@ -52,9 +52,9 @@ def main():
 		query = input('Please type your query object or type \'!\' to exit: ').strip()
 		if query == '!':
 			break
-		results = detector.retrieveImages(query)
+		results, labels = detector.retrieveImages(query)
 		# print(results)
-		detector.outputTargetImages(results, query)
+		detector.outputTargetImages(results, labels)
 
 
 if __name__ == '__main__':
