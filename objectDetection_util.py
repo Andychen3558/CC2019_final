@@ -33,22 +33,18 @@ class ObjectDetector():
 		data = []
 		objects = {}
 		count = 0
-		for v in os.listdir(path):
-			sub_dir = os.path.join(path, v)
-			for f in os.listdir(sub_dir):
-				# if count == 100:
-				# 	break
-				file = join(sub_dir, f)
-				print(file)
-				img = cv2.imread(file)
-				bbox, labels, conf = cv.detect_common_objects(img)
-				data.append({'file':file, 'bbox':bbox, 'labels':labels, 'conf':conf})
-				## build object table
-				for label in labels:
-					if label not in objects:
-						objects[label] = []
-					objects[label].append(len(data)-1)
-				count += 1
+		for f in os.listdir(path):
+			file = join(path, f)
+			print(file)
+			img = cv2.imread(file)
+			bbox, labels, conf = cv.detect_common_objects(img)
+			data.append({'file':file, 'bbox':bbox, 'labels':labels, 'conf':conf})
+			## build object table
+			for label in labels:
+				if label not in objects:
+					objects[label] = []
+				objects[label].append(len(data)-1)
+			count += 1
 		for key in objects:
 			objects[key] = list(set(objects[key]))
 		## write file
