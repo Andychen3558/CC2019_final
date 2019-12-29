@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import cvlib as cv
 from cvlib.object_detection import draw_bbox
 from embedding import Embedding
+from moviepy.editor import *
 
 def viewImage(img, file_name):
 	# timestamp = file_name.split('@@')[1].rstrip('.jpg') + '(s)'
@@ -73,6 +74,28 @@ class ObjectDetector():
 		# return image indices with top 10 highest scores
 		return np.argsort(scores)[::-1][:10], [i[0] for i in ranked_list]
 
+	def outputTargetVideos(self, results):
+		if len(results) == 0:
+			print('Sorry!')
+			return
+		for idx in results:
+			keyframe = self.data[idx]['file']
+			video_name = 'video/' + keyframe.split('mp4')[0].split('/')[1] + 'mp4'
+			timestamp = int(keyframe.split('mp4')[1].split('.')[0][1:]) / 1000
+			start, end = timestamp - 1.5, timestamp + 1.5
+
+			# retrieve video frames
+			clip = VideoFileClip(video_name)
+			print(clip.duration)
+			print(idx)
+			print('timestamp:%f, start:%f, end:%f\n' %(timestamp, start, end))
+			if start < 0:
+				start = 0
+			if end > clip.duration:
+				end = clip.duration
+			subclip = clip.subclip(start, end)
+			subclip.write_videofile(str(idx) + '.mp4')
+
 	def outputTargetImages(self, results, query_label):
 		if len(results) == 0:
 			print('Sorry!')
@@ -89,3 +112,7 @@ class ObjectDetector():
 			output_image = draw_bbox(img, bbox, labels, conf)
 			viewImage(output_image, self.data[idx]['file'])
 
+detector = ObjectDetector()
+detector.loadData('objects.json', 'data.json')
+a = [11, 21, 20, 15, 23, 13, 10, 3, 5, 12]
+detector.outputTargetVideos(a)

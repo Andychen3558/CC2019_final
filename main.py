@@ -53,8 +53,8 @@ def main():
 		if query == '!':
 			break
 		results, labels = detector.retrieveImages(query)
-		# print(results)
-		detector.outputTargetImages(results, labels)
+		detector.outputTargetVideos(results)
+		# detector.outputTargetImages(results, labels)
 
 
 if __name__ == '__main__':
