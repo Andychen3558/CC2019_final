@@ -24,56 +24,36 @@ class ObjectDetector():
 		self.data = []
 		self.embedding = Embedding()
 
-	# def loadData(self, object_file, data_file):
-	# 	self.objects = json.load(open(object_file, 'r'))
-	# 	self.data = json.load(open(data_file, 'r'))
-
-	def loadData(self, data_dir):
-
-		for f in os.listdir(data_dir):
-			sub_dir = os.path.join(data_dir, f)
-			sub_data = json.load(open(os.path.join(sub_dir, 'data.json'), 'r'))
-			sub_object = json.load(open(os.path.join(sub_dir, 'objects.json'), 'r'))
-			l = len(self.data)
-			for label in sub_object:
-				if label not in self.objects:
-					self.objects[label] = []
-				self.objects[label].extend([i+l for i in sub_object[label]])
-			self.data.extend(sub_data)
-
-		self.embedding.count_embedding(self.objects.keys())
+	def loadData(self, object_file, data_file):
+		self.objects = json.load(open(object_file, 'r'))
+		self.data = json.load(open(data_file, 'r'))
 
 	@staticmethod
 	def makeDataset(path):
 		print('[Reading dataset and detect objects...]')
-		
+		data = []
+		objects = {}
+		count = 0
 		for f in os.listdir(path):
-			sub_path = join(path, f)
-			data = []
-			objects = {}
-			count = 0
-			for file in os.listdir(sub_path):
-				file = join(sub_path, file)
-				img = cv2.imread(file)
-				bbox, labels, conf = cv.detect_common_objects(img)
-				data.append({'file':file, 'bbox':bbox, 'labels':labels, 'conf':conf})
-				## build object table
-				for label in labels:
-					if label not in objects:
-						objects[label] = []
-					objects[label].append(len(data)-1)
-				count += 1
-			for key in objects:
-				objects[key] = list(set(objects[key]))
-
-			json.dump(objects, open(join(sub_path, 'objects.json'), 'w'))
-			json.dump(data, open(join(sub_path, 'data.json'), 'w'))
-
+			file = join(path, f)
+			print(file)
+			img = cv2.imread(file)
+			bbox, labels, conf = cv.detect_common_objects(img)
+			data.append({'file':file, 'bbox':bbox, 'labels':labels, 'conf':conf})
+			## build object table
+			for label in labels:
+				if label not in objects:
+					objects[label] = []
+				objects[label].append(len(data)-1)
+			count += 1
+		for key in objects:
+			objects[key] = list(set(objects[key]))
 		## write file
 		# json.dump(objects, open(path + '_objects.json', 'w'))
 		# json.dump(data, open(path + '_data.json', 'w'))
 
-
+		json.dump(objects, open('objects.json', 'w'))
+		json.dump(data, open('data.json', 'w'))
 
 	def retrieveImages(self, query):
 		threshold = 0
