@@ -7,6 +7,7 @@ if __name__ == '__main__':
 	parser.add_argument('--out_dir', default='keyframes', type=str)
 	args = parser.parse_args()
 
+	os.makedirs(args.out_dir, exist_ok=True)
 	existed_videos = os.listdir(args.out_dir)
 
 	for video_name in os.listdir(args.video_dir):

@@ -1,5 +1,7 @@
 .vscode
-
+pentatonix.mp4
+*.json
+keyframes
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
