@@ -87,7 +87,6 @@ def extract_key_frame(video_name, shots, out_dir):
         ret, frame = cap.read()
         v = video_name.split('/')[-1]
         img_name = f'{v}_{t}.jpg'
-        print(img_name)
         cv2.imwrite(os.path.join(out_dir, img_name), frame)
 
 

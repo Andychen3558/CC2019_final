@@ -2,14 +2,15 @@ import gensim.downloader as loader
 import json
 import numpy as np
 class Embedding:
-	def __init__(self, vecfile='glove-wiki-gigaword-50', object_file='objects.json'):
+	def __init__(self, vecfile='glove-wiki-gigaword-50'):
 		self.model = loader.load(vecfile)
 		
 		self.labels_emb = []
 		self.labels = []
-		with open(object_file, 'r') as f:
-			objects = json.load(f)
-			for label in objects:
+
+
+	def count_embedding(self, labels):
+		for label in labels:
 				self.labels_emb.append(self.w2vec(label))
 				self.labels.append(label)
 		self.labels_emb = np.array(self.labels_emb)

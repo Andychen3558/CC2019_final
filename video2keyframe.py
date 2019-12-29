@@ -7,7 +7,15 @@ if __name__ == '__main__':
 	parser.add_argument('--out_dir', default='keyframes', type=str)
 	args = parser.parse_args()
 
+	os.makedirs(args.out_dir, exist_ok=True)
+	existed_videos = os.listdir(args.out_dir)
+
 	for video_name in os.listdir(args.video_dir):
-		video_name = os.path.join(args.video_dir, video_name)
-		shots = shotdetect(video_name)
-		extract_key_frame(video_name, shots, args.out_dir)
+		name = video_name[:video_name.rfind('.')]
+		if name in existed_videos:
+			continue
+		print('extrace keyframes from', video_name)
+		full_video_name = os.path.join(args.video_dir, video_name)
+		shots = shotdetect(full_video_name)
+		frame_dir = os.path.join(args.out_dir, name)
+		extract_key_frame(full_video_name, shots, frame_dir)
