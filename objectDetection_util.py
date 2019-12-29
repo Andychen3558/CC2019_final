@@ -24,36 +24,54 @@ class ObjectDetector():
 		self.data = []
 		self.embedding = Embedding()
 
-	def loadData(self, object_file, data_file):
-		self.objects = json.load(open(object_file, 'r'))
-		self.data = json.load(open(data_file, 'r'))
+	# def loadData(self, object_file, data_file):
+	# 	self.objects = json.load(open(object_file, 'r'))
+	# 	self.data = json.load(open(data_file, 'r'))
+
+	def loadData(self, data_dir):
+
+		for f in os.listdir(data_dir):
+			sub_dir = os.path.join(data_dir, f)
+			sub_data = json.load(open(os.path.join(sub_dir, 'data.json'), 'r'))
+			sub_object = json.load(open(os.path.join(sub_dir, 'objects.json'), 'r'))
+			l = len(self.data)
+			for label in sub_object:
+				if label not in self.objects:
+					self.objects[label] = []
+				self.objects[label].extend([i+l for i in sub_object[label]])
+			self.data.extend(sub_data)
+
+		self.embedding.count_embedding(self.objects.keys())
 
 	@staticmethod
 	def makeDataset(path):
 		print('[Reading dataset and detect objects...]')
-		data = []
-		objects = {}
-		count = 0
+		
 		for f in os.listdir(path):
-			file = join(path, f)
-			print(file)
-			img = cv2.imread(file)
-			bbox, labels, conf = cv.detect_common_objects(img)
-			data.append({'file':file, 'bbox':bbox, 'labels':labels, 'conf':conf})
-			## build object table
-			for label in labels:
-				if label not in objects:
-					objects[label] = []
-				objects[label].append(len(data)-1)
-			count += 1
-		for key in objects:
-			objects[key] = list(set(objects[key]))
+			sub_path = join(path, f)
+			data = []
+			objects = {}
+			count = 0
+			for file in os.listdir(sub_path):
+				file = join(sub_path, file)
+				img = cv2.imread(file)
+				bbox, labels, conf = cv.detect_common_objects(img)
+				data.append({'file':file, 'bbox':bbox, 'labels':labels, 'conf':conf})
+				## build object table
+				for label in labels:
+					if label not in objects:
+						objects[label] = []
+					objects[label].append(len(data)-1)
+				count += 1
+			for key in objects:
+				objects[key] = list(set(objects[key]))
+
+			json.dump(objects, open(join(sub_path, 'objects.json'), 'w'))
+			json.dump(data, open(join(sub_path, 'data.json'), 'w'))
+
 		## write file
 		# json.dump(objects, open(path + '_objects.json', 'w'))
 		# json.dump(data, open(path + '_data.json', 'w'))
-
-		json.dump(objects, open('objects.json', 'w'))
-		json.dump(data, open('data.json', 'w'))
 
 	def retrieveImages(self, query):
 		threshold = 0
@@ -74,27 +92,30 @@ class ObjectDetector():
 		# return image indices with top 10 highest scores
 		return np.argsort(scores)[::-1][:10], [i[0] for i in ranked_list]
 
-	def outputTargetVideos(self, results):
+	def outputTargetVideos(self, query, results):
 		if len(results) == 0:
 			print('Sorry!')
 			return
+
+		count = 0
 		for idx in results:
 			keyframe = self.data[idx]['file']
-			video_name = 'video/' + keyframe.split('mp4')[0].split('/')[1] + 'mp4'
+			video_name = 'video/' + keyframe.split('mp4')[0].split('/')[1] + '.mp4'
 			timestamp = int(keyframe.split('mp4')[1].split('.')[0][1:]) / 1000
 			start, end = timestamp - 1.5, timestamp + 1.5
 
 			# retrieve video frames
 			clip = VideoFileClip(video_name)
-			print(clip.duration)
-			print(idx)
-			print('timestamp:%f, start:%f, end:%f\n' %(timestamp, start, end))
+			print('[video: %s]' %(video_name))
+			print('[timestamp: %f]' %(timestamp))
 			if start < 0:
 				start = 0
 			if end > clip.duration:
 				end = clip.duration
 			subclip = clip.subclip(start, end)
-			subclip.write_videofile(str(idx) + '.mp4')
+			subclip.write_videofile(query + '_' + str(count) + '.mp4')
+
+			count += 1
 
 	def outputTargetImages(self, results, query_label):
 		if len(results) == 0:
@@ -112,7 +133,3 @@ class ObjectDetector():
 			output_image = draw_bbox(img, bbox, labels, conf)
 			viewImage(output_image, self.data[idx]['file'])
 
-detector = ObjectDetector()
-detector.loadData('objects.json', 'data.json')
-a = [11, 21, 20, 15, 23, 13, 10, 3, 5, 12]
-detector.outputTargetVideos(a)

@@ -2,6 +2,7 @@ import numpy as np
 import sys, time
 import cv2
 import os
+import time
 from os.path import join, isdir, isfile
 import argparse
 import json
@@ -37,11 +38,14 @@ def main():
 	detector.loadData(args.data_dir)
 
 	while True:
+		ts = time.time()
 		query = input('Please type your query object or type \'!\' to exit: ').strip()
 		if query == '!':
 			break
 		results, labels = detector.retrieveImages(query)
-		detector.outputTargetVideos(results)
+		detector.outputTargetVideos(query, results)
+		te = time.time()
+		print('Elapsed time: %f' %(te-ts))
 		# detector.outputTargetImages(results, labels)
 
 
