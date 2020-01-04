@@ -73,7 +73,7 @@ def shotdetect(video_name, min_duration_ms=2000):
 
     return record
 
-def extract_key_frame(video_name, shots, out_dir):
+def extract_key_frame(video_name, shots, out_dir, id):
     
     os.makedirs(out_dir, exist_ok=True)
     cap = cv2.VideoCapture(video_name)
@@ -85,10 +85,10 @@ def extract_key_frame(video_name, shots, out_dir):
         t = int((shot[0] + shot[1])/2)
         cap.set(cv2.CAP_PROP_POS_MSEC, t)
         ret, frame = cap.read()
-        v = video_name.split('/')[-1]
-        img_name = f'{v}_{t}.jpg'
-        cv2.imwrite(os.path.join(out_dir, img_name), frame)
+        img_name = f'{id}_{t}.jpg'
 
+        cv2.imwrite(os.path.join(out_dir, img_name), frame)
+        print(os.path.join(out_dir, img_name))
 
 if __name__ == '__main__':
     video_name = os.path.join('video', 'pentatonix.mp4')
