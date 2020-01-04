@@ -40,10 +40,15 @@ def main():
 	while True:
 		ts = time.time()
 		query = input('Please type your query object or type \'!\' to exit: ').strip()
+		if query == '':
+			print('You should type a query object!')
+			continue
 		if query == '!':
 			break
 		results, labels = detector.retrieveImages(query)
-		detector.outputTargetVideos(query, results)
+		url_list =  detector.outputTargetURL(query, results)
+		for url in url_list:
+			print(f'Target timestamp video URL: {url}')
 		te = time.time()
 		print('Elapsed time: %f' %(te-ts))
 		# detector.outputTargetImages(results, labels)

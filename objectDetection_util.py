@@ -6,10 +6,10 @@ from os.path import join
 import argparse
 import json
 import matplotlib.pyplot as plt
-import cvlib as cv
-from cvlib.object_detection import draw_bbox
+
+# from cvlib.object_detection import draw_bbox
 from embedding import Embedding
-from moviepy.editor import *
+# from moviepy.editor import *
 
 def viewImage(img, file_name):
 	# timestamp = file_name.split('@@')[1].rstrip('.jpg') + '(s)'
@@ -45,6 +45,7 @@ class ObjectDetector():
 
 	@staticmethod
 	def makeDataset(path):
+		import cvlib as cv
 		print('[Reading dataset and detect objects...]')
 		
 		for f in os.listdir(path):
@@ -53,8 +54,10 @@ class ObjectDetector():
 			objects = {}
 			count = 0
 			for file in os.listdir(sub_path):
-				file = join(sub_path, file)
-				img = cv2.imread(file)
+				if file.split('.')[-1] == 'json':
+					continue
+				img_path = join(sub_path, file)
+				img = cv2.imread(img_path)
 				bbox, labels, conf = cv.detect_common_objects(img)
 				data.append({'file':file, 'bbox':bbox, 'labels':labels, 'conf':conf})
 				## build object table
@@ -92,30 +95,34 @@ class ObjectDetector():
 		# return image indices with top 10 highest scores
 		return np.argsort(scores)[::-1][:10], [i[0] for i in ranked_list]
 
-	def outputTargetVideos(self, query, results):
+	def outputTargetURL(self, query, results):
 		if len(results) == 0:
-			print('Sorry!')
+			print('Sorry! There is no results available.')
 			return
 
-		count = 0
+		urls = []
 		for idx in results:
-			keyframe = self.data[idx]['file']
-			video_name = 'video/' + keyframe.split('mp4')[0].split('/')[1] + '.mp4'
-			timestamp = int(keyframe.split('mp4')[1].split('.')[0][1:]) / 1000
-			start, end = timestamp - 1.5, timestamp + 1.5
+			keyframe = self.data[idx]['file'].split('_')
+			video_id = keyframe[0]
+			# video_name = 'video/' + keyframe.split('mp4')[0].split('/')[1] + '.mp4'
+			timestamp = int(keyframe[1].split('.')[0]) // 1000
+			start = timestamp - 1
+			url = f'https://youtu.be/{video_id}?t={start}'
+			urls.append(url)
+		return urls
 
-			# retrieve video frames
-			clip = VideoFileClip(video_name)
-			print('[video: %s]' %(video_name))
-			print('[timestamp: %f]' %(timestamp))
-			if start < 0:
-				start = 0
-			if end > clip.duration:
-				end = clip.duration
-			subclip = clip.subclip(start, end)
-			subclip.write_videofile(query + '_' + str(count) + '.mp4')
+			# # retrieve video frames
+			# clip = VideoFileClip(video_name)
+			# print('[video: %s]' %(video_name))
+			# print('[timestamp: %f]' %(timestamp))
+			# if start < 0:
+			# 	start = 0
+			# if end > clip.duration:
+			# 	end = clip.duration
+			# subclip = clip.subclip(start, end)
+			# subclip.write_videofile(query + '_' + str(count) + '.mp4')
 
-			count += 1
+			# count += 1
 
 	def outputTargetImages(self, results, query_label):
 		if len(results) == 0:
