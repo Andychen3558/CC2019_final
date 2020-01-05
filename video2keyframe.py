@@ -5,14 +5,16 @@ from pytube import YouTube
 from shotdetect import shotdetect, extract_key_frame
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
+	parser.add_argument('--url_file', default='urls.txt', type=str)
 	parser.add_argument('--video_dir', default='video', type=str)
 	parser.add_argument('--out_dir', default='keyframes', type=str)
 	args = parser.parse_args()
 
 	os.makedirs(args.out_dir, exist_ok=True)
+	os.makedirs(args.video_dir, exist_ok=True)
 	existed_videos = os.listdir(args.out_dir)
 
-	for url in open('urls.txt','r'):
+	for url in open(args.url_file,'r'):
 		url = url.strip()
 		name = YouTube(url).streams.first().download()
 		shots = shotdetect(name)

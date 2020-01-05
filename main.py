@@ -38,19 +38,19 @@ def main():
 	detector.loadData(args.data_dir)
 
 	while True:
-		ts = time.time()
 		query = input('Please type your query object or type \'!\' to exit: ').strip()
 		if query == '':
 			print('You should type a query object!')
 			continue
 		if query == '!':
 			break
+		ts = time.time()
 		results, labels = detector.retrieveImages(query)
 		url_list =  detector.outputTargetURL(query, results)
-		for url in url_list:
-			print(f'Target timestamp video URL: {url}')
+		for r, url in enumerate(url_list, 1):
+			print(f'#{r}: {url}')
 		te = time.time()
-		print('Elapsed time: %f' %(te-ts))
+		print('searching time: %f s' %(te-ts))
 		# detector.outputTargetImages(results, labels)
 
 

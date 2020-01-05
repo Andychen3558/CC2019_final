@@ -53,6 +53,8 @@ class ObjectDetector():
 			data = []
 			objects = {}
 			count = 0
+			if 'data.json' in os.listdir(sub_path):
+				continue
 			for file in os.listdir(sub_path):
 				if file.split('.')[-1] == 'json':
 					continue
@@ -84,13 +86,20 @@ class ObjectDetector():
 		scores = [0.0] * n
 
 		# ranked_list = [(label, emb_score) for (label, emb_score) in ranked_list if emb_score >= threshold]
-		print(ranked_list)
+		print('EmbScore:')
+		for i in ranked_list:
+			print('{}: {:.02f}'.format(i[0], i[1]))
 		# compute score using tf-idf
 		for (label, emb_score) in ranked_list:
 			for idx in self.objects[label]:
-				tf = np.log(np.sum([l == label for l in self.data[idx]['labels']]) + 1)
+				tf = 1
+				for i in range(len(self.data[idx]['labels'])):
+					if self.data[idx]['labels'][i] == label:
+						tf += self.data[idx]['conf'][i]
+				tf = np.log(tf)
+				# tf = np.log(np.sum([l == label for l in self.data[idx]['labels']]) + 1)
 				idf = np.log(n / len(self.objects[label]))
-				scores[idx] += tf * idf * emb_score
+				scores[idx] += tf * idf * emb_score**3
 
 		# return image indices with top 10 highest scores
 		return np.argsort(scores)[::-1][:10], [i[0] for i in ranked_list]
@@ -102,7 +111,7 @@ class ObjectDetector():
 
 		urls = []
 		for idx in results:
-			keyframe = self.data[idx]['file'].split('_')
+			keyframe = self.data[idx]['file'].rsplit('_', 1)
 			video_id = keyframe[0]
 			# video_name = 'video/' + keyframe.split('mp4')[0].split('/')[1] + '.mp4'
 			timestamp = int(keyframe[1].split('.')[0]) // 1000
